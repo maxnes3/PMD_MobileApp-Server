@@ -14,6 +14,11 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/get/{id}")
+    public UserDTO get(@PathVariable("id") Long id){
+        return new UserDTO(userService.getUserById(id));
+    }
+
     @PostMapping("/signin")
     public UserDTO signIn(@RequestBody UserSignInDTO signInDTO){
         return new UserDTO(userService.signIn(signInDTO));
@@ -38,4 +43,10 @@ public class UserController {
                 .toList();
     }
 
+    @GetMapping("/getAll")
+    public List<UserDTO> getAll() {
+        return userService.getAll().stream().map(
+                UserDTO::new
+        ).toList();
+    }
 }

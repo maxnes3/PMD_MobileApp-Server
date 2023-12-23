@@ -40,4 +40,13 @@ public class StoryController {
                 StoryDTO::new
         ).toList();
     }
+
+    @GetMapping("/getByUser")
+    public List<StoryDTO> getByUser(@RequestParam("page") int page,
+                                    @RequestParam("size") int size,
+                                    @RequestParam("userId") Long userId) {
+        return storyService.getUserStoryPaged(userId, page, size).stream().map(
+                StoryDTO::new
+        ).toList();
+    }
 }

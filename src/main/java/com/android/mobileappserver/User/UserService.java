@@ -1,11 +1,16 @@
 package com.android.mobileappserver.User;
 
 import com.android.mobileappserver.Story.StoryModel;
+import com.android.mobileappserver.Story.StoryNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -17,8 +22,13 @@ public class UserService {
 
     @Transactional
     public UserModel update(UserDTO user){
-        UserModel userCreate = new UserModel(user.getLogin(), user.getEmail(), user.getPassword(), user.getPhoto());
-        return userRepository.save(userCreate);
+        final UserModel currentUser = getUserById(user.getId());
+        byte[] photoBytes = user.getPhoto() != null ? user.getPhoto().getBytes(StandardCharsets.UTF_8) : null;
+        currentUser.setLogin(user.getLogin());
+        currentUser.setEmail(user.getEmail());
+        currentUser.setPassword(user.getPassword());
+        currentUser.setPhoto(photoBytes);
+        return userRepository.save(currentUser);
     }
 
     @Transactional
@@ -32,7 +42,12 @@ public class UserService {
 
     @Transactional
     public UserModel signUp(UserDTO user){
-        UserModel userCreate = new UserModel(user.getLogin(), user.getEmail(), user.getPassword(), user.getPhoto());
+        byte[] photoBytes = user.getPhoto() != null ? user.getPhoto().getBytes(StandardCharsets.UTF_8) : null;
+        UserModel userCreate = new UserModel(
+                user.getLogin(),
+                user.getEmail(),
+                user.getPassword(),
+                photoBytes);
         return userRepository.save(userCreate);
     }
 
@@ -44,6 +59,12 @@ public class UserService {
 
     @Transactional
     public UserModel getUserById(Long id){
-        return userRepository.getReferenceById(id);
+        final Optional<UserModel> user = userRepository.findById(id);
+        return user.orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    @Transactional
+    public List<UserModel> getAll(){
+        return userRepository.findAll();
     }
 }

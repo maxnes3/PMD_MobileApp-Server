@@ -1,10 +1,14 @@
 package com.android.mobileappserver.Mail;
 
+import com.android.mobileappserver.Story.StoryModel;
+import com.android.mobileappserver.Story.StoryNotFoundException;
 import com.android.mobileappserver.User.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 public class MailService {
@@ -43,7 +47,8 @@ public class MailService {
 
     @Transactional
     public MailModel getById(Long id){
-        return mailRepository.getReferenceById(id);
+        final Optional<MailModel> mail = mailRepository.findById(id);
+        return mail.orElseThrow(() -> new MailNotFoundException(id));
     }
 
     @Transactional

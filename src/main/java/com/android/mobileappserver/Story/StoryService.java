@@ -6,6 +6,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+
 @Service
 public class StoryService {
     private final UserService userService;
@@ -16,15 +19,20 @@ public class StoryService {
         this.storyRepository = storyRepository;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public StoryModel getById(Long id){
-        return storyRepository.getReferenceById(id);
+        final Optional<StoryModel> story = storyRepository.findById(id);
+        return story.orElseThrow(() -> new StoryNotFoundException(id));
     }
 
     @Transactional
     public StoryModel insert(StoryDTO storyDTO){
         var user = userService.getUserById(storyDTO.getUserId());
-        StoryModel story = new StoryModel(storyDTO.getTitle(), storyDTO.getDescription(), storyDTO.getCover(), user);
+        StoryModel story = new StoryModel(
+                storyDTO.getTitle(),
+                storyDTO.getDescription(),
+                storyDTO.getCover().getBytes(StandardCharsets.UTF_8),
+                user);
         return storyRepository.save(story);
     }
 
@@ -33,7 +41,7 @@ public class StoryService {
         final StoryModel story = getById(storyDTO.getId());
         story.setTitle(storyDTO.getTitle());
         story.setDescription(storyDTO.getDescription());
-        story.setCover(storyDTO.getCover());
+        story.setCover(storyDTO.getCover().getBytes(StandardCharsets.UTF_8));
         return storyRepository.save(story);
     }
 
@@ -50,5 +58,10 @@ public class StoryService {
     @Transactional
     public Page<StoryModel> getAllStoryPaged(int page, int size){
         return storyRepository.findAll(PageRequest.of(page - 1, size));
+    }
+
+    @Transactional
+    public Page<StoryModel> getUserStoryPaged(Long userId, int page, int size){
+        return storyRepository.findAllByUserId(userId, PageRequest.of(page - 1, size));
     }
 }
