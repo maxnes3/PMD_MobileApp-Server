@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -63,5 +64,10 @@ public class StoryService {
     @Transactional
     public Page<StoryModel> getUserStoryPaged(Long userId, int page, int size){
         return storyRepository.findAllByUserId(userId, PageRequest.of(page - 1, size));
+    }
+
+    @Transactional
+    public List<StoryModel> getStoriesByDate(Long dateFrom, Long dateTo){
+        return storyRepository.findStoriesBetweenDates(dateFrom, dateTo);
     }
 }
