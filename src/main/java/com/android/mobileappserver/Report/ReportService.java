@@ -3,6 +3,7 @@ package com.android.mobileappserver.Report;
 import com.android.mobileappserver.Story.StoryModel;
 import com.android.mobileappserver.Story.StoryService;
 import com.android.mobileappserver.User.UserService;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class ReportService {
     private final UserService userService;
     private final StoryService storyService;
@@ -20,8 +22,8 @@ public class ReportService {
     }
 
     @Transactional
-    public ReportDTO createReport(ReportCreateDTO reportCreateDTO){
-        List<StoryModel> stories = storyService.getStoriesByDate(reportCreateDTO.getDateFrom(), reportCreateDTO.getDateTo());
+    public ReportDTO createReport(Long dateFrom, Long dateTo){
+        List<StoryModel> stories = storyService.getStoriesByDate(dateFrom, dateTo);
         int postCount = stories.size();
         Map<String, Integer> authorWithCount = new HashMap<>();
         for (var story: stories) {
@@ -35,7 +37,7 @@ public class ReportService {
             }
         }
         Map.Entry<String, Integer> maxEntry = Collections.max(authorWithCount.entrySet(), Map.Entry.comparingByValue());
-        return new ReportDTO(reportCreateDTO.getDateFrom(), reportCreateDTO.getDateTo(),
+        return new ReportDTO(dateFrom, dateTo,
                 postCount, maxEntry.getKey(), maxEntry.getValue());
     }
 }

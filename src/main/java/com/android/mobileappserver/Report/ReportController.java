@@ -1,9 +1,6 @@
 package com.android.mobileappserver.Report;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/report")
@@ -14,8 +11,9 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    @PostMapping("/createReport")
-    public ReportDTO createReport(@RequestBody ReportCreateDTO reportCreateDTO){
-        return reportService.createReport(reportCreateDTO);
+    @GetMapping("/createReport/{dateFrom}/{dateTo}")
+    public ReportDTO createReport(@PathVariable("dateFrom") Long dateFrom,
+                                  @PathVariable("dateTo") Long dateTo){
+        return reportService.createReport(dateFrom, dateTo);
     }
 }

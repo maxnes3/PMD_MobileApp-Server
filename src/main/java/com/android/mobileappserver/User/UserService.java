@@ -1,9 +1,6 @@
 package com.android.mobileappserver.User;
 
 import com.android.mobileappserver.Story.StoryModel;
-import com.android.mobileappserver.Story.StoryNotFoundException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
