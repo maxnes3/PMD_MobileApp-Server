@@ -1,7 +1,10 @@
 package com.android.mobileappserver.Report;
 
+import com.android.mobileappserver.Story.StoryDTO;
 import com.android.mobileappserver.Story.StoryModel;
 import com.android.mobileappserver.Story.StoryService;
+import com.android.mobileappserver.User.UserDTO;
+import com.android.mobileappserver.User.UserModel;
 import com.android.mobileappserver.User.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,19 +28,22 @@ public class ReportService {
     public ReportDTO createReport(Long dateFrom, Long dateTo){
         List<StoryModel> stories = storyService.getStoriesByDate(dateFrom, dateTo);
         int postCount = stories.size();
-        Map<String, Integer> authorWithCount = new HashMap<>();
+        Map<Long, Integer> authorWithCount = new HashMap<>();
         for (var story: stories) {
-            String authorName = story.getUser().getLogin();
-            if (authorWithCount.containsKey(authorName)) {
+            Long authorId = story.getUser().getId();
+            if (authorWithCount.containsKey(authorId)) {
                 // Если автор уже есть, увеличиваем количество историй
-                authorWithCount.put(authorName, authorWithCount.get(authorName) + 1);
+                authorWithCount.put(authorId, authorWithCount.get(authorId) + 1);
             } else {
                 // Если автора еще нет в мапе, добавляем его с количеством 1
-                authorWithCount.put(authorName, 1);
+                authorWithCount.put(authorId, 1);
             }
         }
-        Map.Entry<String, Integer> maxEntry = Collections.max(authorWithCount.entrySet(), Map.Entry.comparingByValue());
-        return new ReportDTO(dateFrom, dateTo,
-                postCount, maxEntry.getKey(), maxEntry.getValue());
+        Map.Entry<Long, Integer> maxEntry = Collections.max(authorWithCount.entrySet(), Map.Entry.comparingByValue());
+        UserModel mostPostAuthor = userService.getUserById(maxEntry.getKey());
+        return new ReportDTO(dateFrom, dateTo, postCount, new UserDTO(mostPostAuthor), maxEntry.getValue(),
+                mostPostAuthor.getStories().stream().map(
+                        StoryDTO::new
+                ).toList());
     }
 }
